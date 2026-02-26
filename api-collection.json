@@ -1,0 +1,68 @@
+{
+    "info": {
+        "_postman_id": "76e39f6c-859a-472e-8e0a-3c4d5e6f7a8b",
+        "name": "Progress Dashboard API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Habits",
+            "item": [
+                {
+                    "name": "Get All Habits",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:5000/api/habits"
+                        }
+                    }
+                },
+                {
+                    "name": "Create Habit",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "http://localhost:5000/api/habits"
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"title\": \"New Habit\", \"targetPerDay\": 1}"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Tasks",
+            "item": [
+                {
+                    "name": "Get All Tasks",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:5000/api/tasks"
+                        }
+                    }
+                },
+                {
+                    "name": "Filter Tasks",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:5000/api/tasks?status=TODO&priority=HIGH"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Summary",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "http://localhost:5000/api/summary"
+                }
+            }
+        }
+    ]
+}

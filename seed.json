@@ -1,0 +1,265 @@
+{
+  "users": [
+    {
+      "id": "u1",
+      "fullName": "Durai",
+      "email": "durai@test.com",
+      "password": "123456",
+      "phone": "9876543210",
+      "college": "Example University",
+      "department": "Computer Science",
+      "year": "4th Year",
+      "avatarUrl": "",
+      "createdAt": "2026-01-01"
+    },
+    {
+      "id": "u2",
+      "fullName": "Test User",
+      "email": "testing@test.com",
+      "password": "password",
+      "phone": "1234567890",
+      "college": "Test College",
+      "department": "Mechanical",
+      "year": "2nd Year",
+      "avatarUrl": "",
+      "createdAt": "2026-02-01"
+    },
+    {
+      "fullName": "sathish",
+      "email": "duraisamysathish437@gmail.com",
+      "password": "123456",
+      "phone": "7708988616",
+      "college": "GCE Srirangam",
+      "department": "Computer Science",
+      "year": "3",
+      "avatarUrl": "",
+      "createdAt": "2026-02-24",
+      "id": "bYJUd91"
+    }
+  ],
+  "habits": [
+    {
+      "id": "h1",
+      "userId": "u1",
+      "title": "Drink 3L Water",
+      "targetPerDay": 1,
+      "streak": 7,
+      "history": [
+        {
+          "date": "2026-02-22",
+          "value": 1
+        },
+        {
+          "date": "2026-02-24",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "h2",
+      "userId": "u1",
+      "title": "Read 30 mins",
+      "targetPerDay": 1,
+      "streak": 4,
+      "history": [
+        {
+          "date": "2026-02-22",
+          "value": 1
+        },
+        {
+          "date": "2026-02-24",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "h3",
+      "userId": "u1",
+      "title": "Meditation",
+      "targetPerDay": 1,
+      "streak": 2,
+      "history": [
+        {
+          "date": "2026-02-22",
+          "value": 1
+        },
+        {
+          "date": "2026-02-24",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "h4",
+      "userId": "u1",
+      "title": "Gym/Exercise",
+      "targetPerDay": 1,
+      "streak": 14,
+      "history": [
+        {
+          "date": "2026-02-22",
+          "value": 1
+        },
+        {
+          "date": "2026-02-24",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "h5",
+      "userId": "u2",
+      "title": "Morning Walk",
+      "targetPerDay": 1,
+      "streak": 3,
+      "history": [
+        {
+          "date": "2026-02-24",
+          "value": 1
+        }
+      ]
+    }
+  ],
+  "goals": [
+    {
+      "id": "g1",
+      "userId": "u1",
+      "title": "Learn React Advanced",
+      "targetValue": 100,
+      "currentValue": 80,
+      "milestones": [
+        {
+          "title": "Hooks Deep Dive",
+          "value": 20,
+          "done": true
+        },
+        {
+          "id": "utoymvyrl",
+          "title": "jhasdfuh",
+          "value": 20,
+          "done": true
+        },
+        {
+          "id": "jx1xnzur2",
+          "title": "kqbek",
+          "value": 20,
+          "done": true,
+          "isCustom": false
+        },
+        {
+          "id": "vlympuh3z",
+          "title": "qhg",
+          "value": 20,
+          "done": true,
+          "isCustom": false
+        },
+        {
+          "id": "5gfy4jzii",
+          "title": "qheg",
+          "value": 20,
+          "done": false,
+          "isCustom": false
+        }
+      ]
+    },
+    {
+      "id": "g2",
+      "userId": "u2",
+      "title": "Master Javascript",
+      "targetValue": 100,
+      "currentValue": 50,
+      "milestones": [
+        {
+          "id": "9re7r4tuj",
+          "title": "yqgwiy",
+          "value": 50,
+          "done": true,
+          "isCustom": false
+        },
+        {
+          "id": "izk2a8k3k",
+          "title": "kdjqhd",
+          "value": 50,
+          "done": false,
+          "isCustom": false
+        }
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "t1",
+      "userId": "u1",
+      "title": "uhweu",
+      "priority": "MED",
+      "dueDate": "2026-02-22",
+      "status": "DONE",
+      "completedAt": "2026-02-24",
+      "tags": []
+    },
+    {
+      "id": "t2",
+      "userId": "u1",
+      "title": "ghg",
+      "priority": "LOW",
+      "dueDate": "2026-04-25",
+      "status": "TODO",
+      "tags": []
+    },
+    {
+      "id": "t3",
+      "userId": "u2",
+      "title": "Setup Project",
+      "priority": "HIGH",
+      "dueDate": "2026-02-25",
+      "status": "TODO",
+      "tags": []
+    }
+  ],
+  "learning": [
+    {
+      "id": "l1",
+      "userId": "u1",
+      "topic": "React Hooks",
+      "minutes": 45,
+      "date": "2026-02-22",
+      "notes": "Used useEffect"
+    },
+    {
+      "id": "l2",
+      "userId": "u2",
+      "topic": "JS Basics",
+      "minutes": 30,
+      "date": "2026-02-24",
+      "notes": "Closures"
+    }
+  ],
+  "settings": {
+    "weights": {
+      "habits": 40,
+      "tasks": 40,
+      "learning": 20
+    },
+    "ui": {
+      "theme": "dark",
+      "accentColor": "blue",
+      "showHabits": true,
+      "showTasks": true,
+      "showLearning": true,
+      "showActivity": true
+    },
+    "display": {
+      "dateFormat": "DD/MM/YYYY"
+    },
+    "notifications": {
+      "overdueAlerts": true,
+      "lowProgressAlerts": true,
+      "lowProgressThreshold": 40
+    }
+  },
+  "activity": [],
+  "summary": {
+    "taskCompletion": 0,
+    "habitScore": 0
+  }
+}
