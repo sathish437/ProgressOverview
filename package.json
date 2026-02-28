@@ -1,0 +1,53 @@
+{
+    "name": "progress-overview-monorepo",
+    "private": true,
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "client:dev": "vite client",
+        "client:build": "vite build client",
+        "client:lint": "eslint client",
+        "client:preview": "vite preview client",
+        "server:dev": "nodemon server/index.js",
+        "server:start": "node server/index.js",
+        "server:sync": "node server/scripts/sync.js",
+        "server:seed": "node server/scripts/seed.js",
+        "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+        "install:all": "npm install"
+    },
+    "dependencies": {
+        "axios": "^1.13.5",
+        "bcryptjs": "^2.4.3",
+        "clsx": "^2.1.0",
+        "cors": "^2.8.6",
+        "date-fns": "^3.3.1",
+        "dotenv": "^16.3.1",
+        "express": "^5.2.1",
+        "framer-motion": "^11.0.8",
+        "jsonwebtoken": "^9.0.1",
+        "lucide-react": "^0.344.0",
+        "mysql2": "^3.5.2",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-router-dom": "^6.22.3",
+        "recharts": "^2.12.2",
+        "sequelize": "^6.32.1",
+        "tailwind-merge": "^2.2.1",
+        "uuid": "^9.0.1"
+    },
+    "devDependencies": {
+        "@types/react": "^18.2.64",
+        "@types/react-dom": "^18.2.21",
+        "@vitejs/plugin-react": "^4.2.1",
+        "autoprefixer": "^10.4.18",
+        "concurrently": "^8.2.2",
+        "eslint": "^8.57.0",
+        "eslint-plugin-react": "^7.34.0",
+        "eslint-plugin-react-hooks": "^4.6.0",
+        "eslint-plugin-react-refresh": "^0.4.5",
+        "nodemon": "^3.0.1",
+        "postcss": "^8.4.35",
+        "tailwindcss": "^3.4.1",
+        "vite": "^5.1.5"
+    }
+}
