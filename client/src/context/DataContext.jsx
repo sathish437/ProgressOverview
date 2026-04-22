@@ -12,7 +12,7 @@ const api = axios.create({
 
 // Axios Interceptor for JWT
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('authToken');
+    const token = sessionStorage.getItem('authToken');
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
         // console.debug('Axios Interceptor: Token attached');
@@ -38,7 +38,7 @@ export function DataProvider({ children }) {
     const [error, setError] = useState(null);
 
     const fetchData = async () => {
-        const token = localStorage.getItem('authToken');
+        const token = sessionStorage.getItem('authToken');
         if (!user || !token) {
             setData({
                 habits: [],
