@@ -14,15 +14,26 @@ import settingRoutes from './routes/settings.js';
 import dashboardRoutes from './routes/dashboard.js';
 import { auth } from './middleware/auth.js';
 
+import path from 'path';
+import { fileURLToPath } from 'url';
+
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// 🔥 Fix __dirname (ES modules)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// 🔥 Middleware
 app.use(cors());
 app.use(express.json());
 
-// --- Public Routes ---
+
+// =======================
+// ✅ PUBLIC ROUTES
+// =======================
 app.use('/api/auth', authRoutes);
 
 app.get('/api/test-server', (req, res) => {
@@ -30,7 +41,9 @@ app.get('/api/test-server', (req, res) => {
     res.json({ message: "Server is reachable and picking up changes" });
 });
 
-// --- Health Check ---
+// =======================
+// ✅ HEALTH CHECK
+// =======================
 app.get('/api/health', async (req, res) => {
     try {
         await sequelize.authenticate();
@@ -40,7 +53,9 @@ app.get('/api/health', async (req, res) => {
     }
 });
 
-// --- Protected Routes ---
+// =======================
+// 🔒 PROTECTED ROUTES
+// =======================
 app.use('/api/users', auth, userRoutes);
 app.use('/api/tasks', auth, taskRoutes);
 app.use('/api/goals', auth, goalRoutes);
@@ -49,8 +64,24 @@ app.use('/api/learning', auth, learningRoutes);
 app.use('/api/settings', auth, settingRoutes);
 app.use('/api/dashboard', auth, dashboardRoutes);
 
+
+// =======================
+// 🔥 SERVE FRONTEND (IMPORTANT)
+// =======================
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+// React Router support
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+});
+
+
+// =======================
+// 🚀 START SERVER
+// =======================
 app.listen(PORT, async () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
+
     try {
         await sequelize.authenticate();
         console.log('Database connection has been established successfully.');
