@@ -23,20 +23,14 @@ export default function Goals() {
 
         if (autoMilestones.length === 0) return milestones;
 
-        const totalCustomValue = customMilestones.reduce((sum, m) => sum + (parseFloat(m.value) || 0), 0);
+        const totalCustomValue = customMilestones.reduce((sum, m) => sum + (parseInt(m.value, 10) || 0), 0);
         const remainingValue = Math.max(0, targetValue - totalCustomValue);
 
-        const baseValue = parseFloat((remainingValue / autoMilestones.length).toFixed(2));
-        let runningSum = 0;
+        const baseValue = Math.floor(remainingValue / autoMilestones.length);
+        const remainder = remainingValue - baseValue * autoMilestones.length;
 
         const updatedAutoMilestones = autoMilestones.map((m, idx) => {
-            let val = baseValue;
-            if (idx === autoMilestones.length - 1) {
-                // Adjust last one to ensure exact sum
-                val = parseFloat((remainingValue - runningSum).toFixed(2));
-            } else {
-                runningSum += val;
-            }
+            const val = idx < remainder ? baseValue + 1 : baseValue;
             return { ...m, value: val };
         });
 
@@ -77,7 +71,6 @@ export default function Goals() {
 
         const goal = goals.find(g => g.id === goalId);
         const newMs = {
-            id: Math.random().toString(36).substr(2, 9),
             title,
             value: 0,
             done: false,
@@ -112,7 +105,7 @@ export default function Goals() {
 
         const customVal = prompt("Custom Value (leave empty for auto-balance):", ms.isCustom ? ms.value : "");
         const isCustom = customVal !== "" && !isNaN(parseFloat(customVal));
-        const value = isCustom ? parseFloat(customVal) : 0;
+        const value = isCustom ? Math.round(parseFloat(customVal)) : 0;
 
         const updatedMilestones = [...goal.milestones];
         updatedMilestones[index] = { ...ms, title: newTitle, value, isCustom };
@@ -129,7 +122,6 @@ export default function Goals() {
     const generateMilestones = (goal) => {
         const count = parseInt(prompt("How many milestones to generate?", "5")) || 5;
         const newMilestones = Array.from({ length: count }).map((_, i) => ({
-            id: Math.random().toString(36).substr(2, 9),
             title: `Milestone ${i + 1}`,
             value: 0,
             done: false,
@@ -239,7 +231,7 @@ export default function Goals() {
                                 <div className="space-y-1.5 max-h-60 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-800">
                                     {(goal.milestones || []).map((ms, idx) => (
                                         <div
-                                            key={idx}
+                                            key={ms.id ?? idx}
                                             className="flex items-center justify-between p-2 hover:bg-white/5 rounded-lg group transition-colors"
                                         >
                                             <div

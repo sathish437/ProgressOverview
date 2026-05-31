@@ -12,7 +12,7 @@ import { MotionWrapper } from '../components/ui/MotionWrapper';
 import { AnimatePresence, motion } from 'framer-motion';
 
 export default function Dashboard() {
-    const { habits, tasks, learning, settings, weeklyStats } = useData();
+    const { habits, tasks, learning, goals, settings, weeklyStats } = useData();
     const { user, loading: authLoading } = useAuth();
     const navigate = useNavigate();
     const today = new Date();
@@ -53,10 +53,20 @@ export default function Dashboard() {
                 (learningScore * (weights.learning / 100))
             );
 
-            return { habitScore, habitDoneCount: habitsDone, taskScore, taskDoneCount: tasksDoneOnDay, learningScore, sessionsDone, dailyScore };
+            return { habitScore, habitDoneCount: habitsDone, habitsTotal, taskScore, taskDoneCount: tasksDoneOnDay, learningScore, sessionsDone, dailyScore };
         };
 
         const todayScores = calculateScoresForDate(todayStr);
+
+        // Goals Progress
+        const goalsTotalCount = goals.length;
+        const goalsCompletedCount = goals.filter(g => g.currentValue >= g.targetValue).length;
+        const goalsScore = goalsTotalCount > 0
+            ? Math.round(goals.reduce((sum, g) => {
+                const ratio = g.targetValue > 0 ? Math.min(g.currentValue / g.targetValue, 1) : 0;
+                return sum + (ratio * 100);
+            }, 0) / goalsTotalCount)
+            : 0;
 
         // Special case for today's summary display (total done tasks regardless of day)
         const totalTasksDone = tasks.filter(t => t.status === 'DONE').length;
@@ -65,6 +75,9 @@ export default function Dashboard() {
 
         return {
             ...todayScores,
+            goalsScore,
+            goalsCompletedCount,
+            goalsTotalCount,
             totalTasksDone,
             totalTasksCount,
             overallTaskScore,
@@ -76,7 +89,8 @@ export default function Dashboard() {
         habitScore, habitDoneCount, habitsTotal,
         overallTaskScore, totalTasksDone, totalTasksCount,
         learningScore, sessionsDone,
-        dailyScore, calculateScoresForDate
+        dailyScore, calculateScoresForDate,
+        goalsScore, goalsCompletedCount, goalsTotalCount
     } = scores;
 
     // --- Data for Chart - Use backend dates but local calculation for consistent scoring ---
@@ -94,7 +108,8 @@ export default function Dashboard() {
                 score: dayScores.dailyScore,
                 habits: Math.round(dayScores.habitScore),
                 tasks: Math.round(dayScores.taskScore),
-                learning: Math.round(dayScores.learningScore)
+                learning: Math.round(dayScores.learningScore),
+                goals: Math.round(goalsScore)
             };
         });
     }, [calculateScoresForDate, today, weeklyStats]);
@@ -203,6 +218,30 @@ export default function Dashboard() {
                         </motion.div>
                     )}
 
+                    {/* Goals Card */}
+                    <motion.div
+                        key="goals-card"
+                        layout
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                    >
+                        <Card onClick={() => navigate('/goals')} className="items-center justify-between group h-full">
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="p-3 bg-cyan-500/10 text-cyan-400 rounded-xl group-hover:bg-cyan-500/20 transition-colors">
+                                    <Target size={24} />
+                                </div>
+                                <span className="text-xs font-medium px-2 py-1 rounded-full bg-surface border border-gray-700 text-muted">
+                                    {Math.round(goalsScore)}%
+                                </span>
+                            </div>
+                            <h3 className="text-lg font-medium text-white mb-1">Goals</h3>
+                            <p className="text-muted text-sm mb-4">{goalsCompletedCount}/{goalsTotalCount} Completed</p>
+                            <p className="text-muted text-xs mb-4">Learning sessions help drive your goals.</p>
+                            <ProgressBar value={goalsScore} colorClass="bg-cyan-500" />
+                        </Card>
+                    </motion.div>
+
                     {/* Learning Card */}
                     {settings?.showLearning !== false && (
                         <motion.div
@@ -247,6 +286,10 @@ export default function Dashboard() {
                                         <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
                                         <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
                                     </linearGradient>
+                                    <linearGradient id="colorGoals" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.2} />
+                                        <stop offset="95%" stopColor="#14B8A6" stopOpacity={0} />
+                                    </linearGradient>
                                 </defs>
                                 <XAxis
                                     dataKey="name"
@@ -266,6 +309,14 @@ export default function Dashboard() {
                                     strokeWidth={3}
                                     fillOpacity={1}
                                     fill="url(#colorScore)"
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="goals"
+                                    stroke="#14B8A6"
+                                    strokeWidth={2}
+                                    fillOpacity={0.15}
+                                    fill="url(#colorGoals)"
                                 />
                             </AreaChart>
                         </ResponsiveContainer>
