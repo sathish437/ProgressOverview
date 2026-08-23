@@ -12,6 +12,7 @@ import habitRoutes from './routes/habits.js';
 import learningRoutes from './routes/learning.js';
 import settingRoutes from './routes/settings.js';
 import dashboardRoutes from './routes/dashboard.js';
+import templateRoutes from './routes/template.js';
 import { auth } from './middleware/auth.js';
 
 import path from 'path';
@@ -63,6 +64,10 @@ app.use('/api/habits', auth, habitRoutes);
 app.use('/api/learning', auth, learningRoutes);
 app.use('/api/settings', auth, settingRoutes);
 app.use('/api/dashboard', auth, dashboardRoutes);
+app.use('/api/template', auth, templateRoutes);
+app.use('/api/reset', auth, templateRoutes);
+app.use('/api/reset-template', auth, templateRoutes);
+app.use('/api/productivity', auth, templateRoutes);
 
 
 // =======================
@@ -85,6 +90,8 @@ app.listen(PORT, async () => {
     try {
         await sequelize.authenticate();
         console.log('Database connection has been established successfully.');
+        await sequelize.sync({ alter: true });
+        console.log('Database schema synchronized successfully.');
     } catch (error) {
         console.error('Unable to connect to the database:', error);
     }

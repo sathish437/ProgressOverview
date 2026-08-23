@@ -81,7 +81,7 @@ export default function Register() {
                                 <h3 className="text-lg font-bold text-white border-b border-gray-800 pb-2">Personal Information</h3>
                             </div>
 
-                            <Field label="Full Name" name="fullName" value={formData.fullName} onChange={handleChange} icon={<User size={18} />} placeholder="Durai" required />
+                            <Field label="Full Name" name="fullName" value={formData.fullName} onChange={handleChange} icon={<User size={18} />} placeholder="e.g. Alex Rivers" required />
                             <Field label="Email Address" name="email" type="email" value={formData.email} onChange={handleChange} icon={<Mail size={18} />} placeholder="your@email.com" required />
                             <Field label="Phone Number" name="phone" value={formData.phone} onChange={handleChange} icon={<Phone size={18} />} placeholder="9876543210" required />
                             <Field label="Avatar URL (Optional)" name="avatarUrl" value={formData.avatarUrl} onChange={handleChange} icon={<Camera size={18} />} placeholder="https://..." />

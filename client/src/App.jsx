@@ -1,25 +1,24 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { DataProvider } from './context/DataContext.jsx'
-import Layout from './layout/Layout.jsx'
-import Dashboard from './pages/Dashboard.jsx'
-import Tasks from './pages/Tasks.jsx'
-import Habits from './pages/Habits.jsx'
-
-import Goals from './pages/Goals.jsx'
-import Learning from './pages/Learning.jsx'
-
+import { DataProvider } from './context/DataContext.jsx';
+import Layout from './layout/Layout.jsx';
+import Dashboard from './pages/Dashboard.jsx';
+import Tasks from './pages/Tasks.jsx';
+import Habits from './pages/Habits.jsx';
+import Goals from './pages/Goals.jsx';
+import Learning from './pages/Learning.jsx';
+import Settings from './pages/Settings.jsx';
+import Profile from './pages/Profile.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import ProtectedRoute from './components/auth/ProtectedRoute.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
-import Profile from './pages/Profile.jsx';
 
 function App() {
     return (
         <AuthProvider>
             <DataProvider>
-                <div className="min-h-screen bg-background text-text font-sans">
+                <div className="min-h-screen bg-background text-text font-sans antialiased selection:bg-primary/30 selection:text-white">
                     <Routes>
                         {/* Public Routes */}
                         <Route path="/login" element={<Login />} />
@@ -34,6 +33,7 @@ function App() {
                                 <Route path="/habits" element={<Habits />} />
                                 <Route path="/goals" element={<Goals />} />
                                 <Route path="/learning" element={<Learning />} />
+                                <Route path="/settings" element={<Settings />} />
                                 <Route path="/profile" element={<Profile />} />
                             </Route>
                         </Route>

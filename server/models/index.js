@@ -18,9 +18,10 @@ export const User = sequelize.define('User', {
 // --- Task Model ---
 export const Task = sequelize.define('Task', {
     title: { type: DataTypes.STRING, allowNull: false },
-    status: { type: DataTypes.ENUM('TODO', 'DONE'), defaultValue: 'TODO' },
-    priority: { type: DataTypes.ENUM('HIGH', 'MED', 'LOW'), defaultValue: 'MED' },
-    dueDate: { type: DataTypes.DATEONLY },
+    status: { type: DataTypes.STRING, defaultValue: 'TODO' }, // TODO, IN_PROGRESS, REVIEW, DONE
+    priority: { type: DataTypes.STRING, defaultValue: 'MED' }, // HIGH, MED, LOW
+    description: { type: DataTypes.TEXT },
+    dueDate: { type: DataTypes.STRING },
     tags: { type: DataTypes.JSON, defaultValue: [] },
     completedAt: { type: DataTypes.DATE }
 });
@@ -29,7 +30,9 @@ export const Task = sequelize.define('Task', {
 export const Goal = sequelize.define('Goal', {
     title: { type: DataTypes.STRING, allowNull: false },
     targetValue: { type: DataTypes.INTEGER, defaultValue: 100 },
-    currentValue: { type: DataTypes.INTEGER, defaultValue: 0 }
+    currentValue: { type: DataTypes.INTEGER, defaultValue: 0 },
+    category: { type: DataTypes.STRING },
+    deadline: { type: DataTypes.STRING }
 });
 
 // --- Milestone Model ---
@@ -37,19 +40,22 @@ export const Milestone = sequelize.define('Milestone', {
     title: { type: DataTypes.STRING, allowNull: false },
     value: { type: DataTypes.INTEGER, defaultValue: 0 },
     done: { type: DataTypes.BOOLEAN, defaultValue: false },
+    isCustom: { type: DataTypes.BOOLEAN, defaultValue: false },
     completedAt: { type: DataTypes.DATE }
 });
 
 // --- Habit Model ---
 export const Habit = sequelize.define('Habit', {
     title: { type: DataTypes.STRING, allowNull: false },
+    category: { type: DataTypes.STRING },
     targetPerDay: { type: DataTypes.INTEGER, defaultValue: 1 },
-    streak: { type: DataTypes.INTEGER, defaultValue: 0 }
+    streak: { type: DataTypes.INTEGER, defaultValue: 0 },
+    bestStreak: { type: DataTypes.INTEGER, defaultValue: 0 }
 });
 
 // --- Habit History Model ---
 export const HabitHistory = sequelize.define('HabitHistory', {
-    date: { type: DataTypes.DATEONLY, allowNull: false },
+    date: { type: DataTypes.STRING, allowNull: false },
     value: { type: DataTypes.INTEGER, defaultValue: 0 }
 });
 
@@ -57,7 +63,7 @@ export const HabitHistory = sequelize.define('HabitHistory', {
 export const Learning = sequelize.define('Learning', {
     topic: { type: DataTypes.STRING, allowNull: false },
     minutes: { type: DataTypes.INTEGER, defaultValue: 0 },
-    date: { type: DataTypes.DATEONLY, allowNull: false },
+    date: { type: DataTypes.STRING, allowNull: false },
     notes: { type: DataTypes.TEXT }
 });
 
@@ -72,7 +78,11 @@ export const Setting = sequelize.define('Setting', {
     showHabits: { type: DataTypes.BOOLEAN, defaultValue: true },
     showTasks: { type: DataTypes.BOOLEAN, defaultValue: true },
     showLearning: { type: DataTypes.BOOLEAN, defaultValue: true },
-    showActivity: { type: DataTypes.BOOLEAN, defaultValue: true }
+    showGoals: { type: DataTypes.BOOLEAN, defaultValue: true },
+    showActivity: { type: DataTypes.BOOLEAN, defaultValue: true },
+    overdueAlerts: { type: DataTypes.BOOLEAN, defaultValue: true },
+    lowProgressAlerts: { type: DataTypes.BOOLEAN, defaultValue: true },
+    lowProgressThreshold: { type: DataTypes.INTEGER, defaultValue: 50 }
 });
 
 // --- Associations ---

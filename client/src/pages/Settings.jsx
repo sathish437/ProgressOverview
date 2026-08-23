@@ -1,340 +1,366 @@
 import React, { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import { Card } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
 import { MotionWrapper } from '../components/ui/MotionWrapper';
 import {
     Save,
     RotateCcw,
-    Download,
-    Trash2,
-    Palette,
     Bell,
-    Layout as LayoutIcon,
+    Layers,
     Scale,
-    Check
+    AlertTriangle,
+    Database,
+    Flame,
+    ListTodo,
+    BookOpen
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Toast } from '../components/ui/Toast';
-
-const ACCENT_COLORS = [
-    { name: 'Blue', value: 'blue', class: 'bg-blue-500' },
-    { name: 'Purple', value: 'purple', class: 'bg-purple-500' },
-    { name: 'Green', value: 'green', class: 'bg-green-500' },
-    { name: 'Orange', value: 'orange', class: 'bg-orange-500' },
-];
+import { AnimatePresence } from 'framer-motion';
 
 export default function Settings() {
-    const { settings, updateSettings, resetData, data } = useData();
+    const { settings, updateSettings, resetToTemplate } = useData();
     const [localSettings, setLocalSettings] = useState(null);
+    const [saving, setSaving] = useState(false);
     const [toast, setToast] = useState(null);
 
     useEffect(() => {
         if (settings) {
-            setLocalSettings(settings);
+            setLocalSettings({
+                weightsHabits: Number(settings.weightsHabits ?? 40),
+                weightsTasks: Number(settings.weightsTasks ?? 40),
+                weightsLearning: Number(settings.weightsLearning ?? 20),
+                learningDailyTargetMinutes: Number(settings.learningDailyTargetMinutes ?? 60),
+                theme: settings.theme || 'dark',
+                accentColor: settings.accentColor || 'blue',
+                showHabits: settings.showHabits !== false,
+                showTasks: settings.showTasks !== false,
+                showLearning: settings.showLearning !== false,
+                showGoals: settings.showGoals !== false,
+                overdueAlerts: settings.overdueAlerts !== false,
+                lowProgressAlerts: settings.lowProgressAlerts !== false,
+                lowProgressThreshold: Number(settings.lowProgressThreshold ?? 50)
+            });
         }
     }, [settings]);
 
     if (!localSettings) return null;
 
-    const handleSave = async (section) => {
-        try {
-            // Validation for weights
-            if (section === 'weights') {
-                const total = Number(localSettings.weightsHabits) +
-                    Number(localSettings.weightsTasks) +
-                    Number(localSettings.weightsLearning);
-                if (total !== 100) {
-                    setToast({ message: `Total weight must be 100% (Current: ${total}%)`, type: 'error' });
-                    return;
-                }
-            }
+    const totalWeight = Number(localSettings.weightsHabits) +
+        Number(localSettings.weightsTasks) +
+        Number(localSettings.weightsLearning);
 
+    const handleSaveSettings = async () => {
+        if (totalWeight !== 100) {
+            setToast({ message: `Total weight must equal 100% (Current total: ${totalWeight}%)`, type: 'error' });
+            return;
+        }
+
+        setSaving(true);
+        try {
             await updateSettings(localSettings);
-            setToast({ message: "Settings saved successfully!", type: 'success' });
+            setToast({ message: "Settings and preferences saved successfully!", type: 'success' });
         } catch (err) {
-            setToast({ message: "Failed to save settings", type: 'error' });
+            setToast({ message: "Failed to save settings.", type: 'error' });
+        } finally {
+            setSaving(false);
         }
     };
 
-    const exportData = () => {
-        const dataStr = JSON.stringify(data, null, 2);
-        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-        const exportFileDefaultName = 'progress-data.json';
-        const linkElement = document.createElement('a');
-        linkElement.setAttribute('href', dataUri);
-        linkElement.setAttribute('download', exportFileDefaultName);
-        linkElement.click();
-        setToast({ message: "Data exported successfully!", type: 'success' });
-    };
-
-    const clearActivityLog = async () => {
-        if (window.confirm("Are you sure you want to clear the activity log?")) {
-            // In a real app, this would be an API call. For now we just mock or update local.
-            setToast({ message: "Activity log cleared (Mock)", type: 'success' });
+    const handleResetProductivityData = async () => {
+        if (window.confirm("Are you sure you want to reset all your productivity data? This will permanently remove your habits, tasks, goals, and learning logs.")) {
+            try {
+                await resetToTemplate();
+                setToast({ message: "Productivity data reset successfully! All records cleared.", type: 'success' });
+            } catch (err) {
+                setToast({ message: "Failed to reset productivity data.", type: 'error' });
+            }
         }
     };
 
     return (
-        <MotionWrapper className="space-y-8 pb-12">
-            <div>
-                <h1 className="text-3xl font-bold text-white">Settings</h1>
-                <p className="text-muted">Personalize your experience and manage your data.</p>
+        <MotionWrapper className="space-y-4 sm:space-y-6 md:space-y-8 pb-16">
+            {/* Header */}
+            <div className="p-4 sm:p-6 rounded-2xl bg-[#17171C]/90 border border-white/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4">
+                <div>
+                    <h1 className="text-lg sm:text-xl md:text-2xl font-extrabold text-white tracking-tight">Customizable Settings & Preferences</h1>
+                    <p className="text-xs text-muted mt-0.5">
+                        Configure daily score formula weights, dashboard modules, notification alerts, and manage productivity data.
+                    </p>
+                </div>
+                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+                    Neon PostgreSQL Persistent
+                </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
 
-                {/* 1. Progress Weights */}
-                <Card className="flex flex-col">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="p-2 bg-blue-500/10 text-blue-400 rounded-lg">
-                            <Scale size={20} />
-                        </div>
-                        <h3 className="text-xl font-bold text-white">Daily Score Split</h3>
-                    </div>
-
-                    <div className="space-y-6 flex-1">
-                        {[
-                            { key: 'weightsHabits', label: 'Habits' },
-                            { key: 'weightsTasks', label: 'Tasks' },
-                            { key: 'weightsLearning', label: 'Learning' }
-                        ].map(({ key, label }) => (
-                            <div key={key} className="space-y-2">
-                                <div className="flex justify-between items-center text-sm">
-                                    <label className="text-white capitalize font-medium">{label}</label>
-                                    <span className="text-muted font-mono">{localSettings[key]}%</span>
-                                </div>
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    value={localSettings[key]}
-                                    onChange={(e) => setLocalSettings({
-                                        ...localSettings,
-                                        [key]: parseInt(e.target.value) || 0
-                                    })}
-                                    className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-primary"
-                                />
+                {/* 1. Daily Scoring Weights Split */}
+                <Card className="flex flex-col p-4 sm:p-6 bg-[#17171C]/90 border-white/5 md:col-span-2">
+                    <div className="flex items-center justify-between mb-4 sm:mb-5 pb-3 border-b border-white/5">
+                        <div className="flex items-center gap-2.5 sm:gap-3">
+                            <div className="p-2 sm:p-2.5 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20 shrink-0">
+                                <Scale size={17} />
                             </div>
-                        ))}
-
-                        {/* Split Preview */}
-                        <div className="h-4 w-full flex rounded-full overflow-hidden border border-gray-800">
-                            <div className="bg-blue-500 transition-all duration-500" style={{ width: `${localSettings.weightsHabits}%` }}></div>
-                            <div className="bg-purple-500 transition-all duration-500" style={{ width: `${localSettings.weightsTasks}%` }}></div>
-                            <div className="bg-orange-500 transition-all duration-500" style={{ width: `${localSettings.weightsLearning}%` }}></div>
-                        </div>
-                    </div>
-
-                    <Button onClick={() => handleSave('weights')} className="mt-8 bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-white flex items-center justify-center gap-2">
-                        <Save size={18} />
-                        Save Weights
-                    </Button>
-                </Card>
-
-                {/* 2. Theme & UI */}
-                <Card className="flex flex-col">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="p-2 bg-purple-500/10 text-purple-400 rounded-lg">
-                            <Palette size={20} />
-                        </div>
-                        <h3 className="text-xl font-bold text-white">Theme & UI</h3>
-                    </div>
-
-                    <div className="space-y-8 flex-1">
-                        <div className="space-y-3">
-                            <label className="text-sm font-medium text-muted">Accent Color</label>
-                            <div className="flex gap-4">
-                                {ACCENT_COLORS.map((color) => (
-                                    <button
-                                        key={color.value}
-                                        onClick={() => setLocalSettings({
-                                            ...localSettings,
-                                            accentColor: color.value
-                                        })}
-                                        className={cn(
-                                            "w-10 h-10 rounded-full flex items-center justify-center transition-all",
-                                            color.class,
-                                            localSettings.accentColor === color.value ? "ring-4 ring-white/20 scale-110" : "opacity-60 hover:opacity-100"
-                                        )}
-                                    >
-                                        {localSettings.accentColor === color.value && <Check size={20} className="text-white" />}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-between p-4 rounded-xl bg-background/50 border border-gray-800">
                             <div>
-                                <h4 className="font-medium text-white">Theme Mode</h4>
-                                <p className="text-xs text-muted">Toggle between dark and light</p>
+                                <h3 className="text-sm sm:text-base font-extrabold text-white">Daily Score Formula Weights</h3>
+                                <p className="text-[11px] sm:text-xs text-muted">Adjust contribution of each module to total daily score</p>
                             </div>
-                            <select
-                                value={localSettings.theme}
-                                onChange={(e) => setLocalSettings({ ...localSettings, theme: e.target.value })}
-                                className="bg-surface border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white outline-none"
-                            >
-                                <option value="dark">Dark</option>
-                                <option value="light">Light</option>
-                            </select>
                         </div>
+                        <span className={cn(
+                            "text-xs font-mono font-bold px-2.5 py-1 rounded-lg shrink-0",
+                            totalWeight === 100 ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30" : "bg-red-500/10 text-red-400 border border-red-500/30 animate-pulse"
+                        )}>
+                            Total: {totalWeight}%
+                        </span>
                     </div>
 
-                    <Button onClick={() => handleSave('ui')} className="mt-8 bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-white flex items-center justify-center gap-2">
-                        <Save size={18} />
-                        Save UI Preferences
-                    </Button>
-                </Card>
-
-                {/* 3. Display Modules */}
-                <Card className="flex flex-col">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="p-2 bg-orange-500/10 text-orange-400 rounded-lg">
-                            <LayoutIcon size={20} />
-                        </div>
-                        <h3 className="text-xl font-bold text-white">Dashboard Layout</h3>
-                    </div>
-
-                    <div className="space-y-3 flex-1">
-                        {[
-                            { id: 'showHabits', label: 'Habits Module', desc: 'Display progress on your habits' },
-                            { id: 'showTasks', label: 'Tasks Module', desc: 'Display your pending tasks' },
-                            { id: 'showLearning', label: 'Learning Module', desc: 'Display tracker for learning' },
-                            { id: 'showActivity', label: 'Activity Log', desc: 'Display recent user logs' }
-                        ].map((module) => (
-                            <div key={module.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer"
-                                onClick={() => setLocalSettings({
-                                    ...localSettings,
-                                    [module.id]: !localSettings[module.id]
-                                })}
-                            >
-                                <div>
-                                    <h4 className="text-sm font-medium text-white">{module.label}</h4>
-                                    <p className="text-[11px] text-muted">{module.desc}</p>
-                                </div>
-                                <div className={cn(
-                                    "w-10 h-5 rounded-full relative transition-colors duration-200",
-                                    localSettings[module.id] ? "bg-primary" : "bg-gray-700"
-                                )}>
-                                    <div className={cn(
-                                        "absolute top-1 w-3 h-3 bg-white rounded-full transition-all",
-                                        localSettings[module.id] ? "left-6" : "left-1"
-                                    )}></div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    <Button onClick={() => handleSave('ui')} className="mt-8 bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-white flex items-center justify-center gap-2">
-                        <Save size={18} />
-                        Save Layout
-                    </Button>
-                </Card>
-
-                {/* 4. Notifications */}
-                <Card className="flex flex-col">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="p-2 bg-green-500/10 text-green-400 rounded-lg">
-                            <Bell size={20} />
-                        </div>
-                        <h3 className="text-xl font-bold text-white">Notifications</h3>
-                    </div>
-
-                    <div className="space-y-6 flex-1">
-                        <div className="flex items-center justify-between">
-                            <h4 className="text-sm font-medium text-white">Overdue Task Alerts</h4>
-                            <input
-                                type="checkbox"
-                                checked={localSettings.overdueAlerts}
-                                onChange={(e) => setLocalSettings({
-                                    ...localSettings,
-                                    overdueAlerts: e.target.checked
-                                })}
-                                className="w-5 h-5 accent-primary"
-                            />
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                            <h4 className="text-sm font-medium text-white">Low Progress Alerts</h4>
-                            <input
-                                type="checkbox"
-                                checked={localSettings.lowProgressAlerts}
-                                onChange={(e) => setLocalSettings({
-                                    ...localSettings,
-                                    lowProgressAlerts: e.target.checked
-                                })}
-                                className="w-5 h-5 accent-primary"
-                            />
-                        </div>
-
-                        <div className="space-y-3">
-                            <div className="flex justify-between text-xs">
-                                <span className="text-muted">Progress Threshold</span>
-                                <span className="text-white font-mono">{localSettings.lowProgressThreshold}%</span>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+                        <div className="p-3.5 sm:p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                            <div className="flex justify-between text-xs font-semibold mb-2">
+                                <span className="text-white flex items-center gap-1.5">
+                                    <Flame size={14} className="text-orange-400" /> Habits Completion
+                                </span>
+                                <span className="font-mono text-orange-400 font-bold">{localSettings.weightsHabits}%</span>
                             </div>
                             <input
                                 type="range"
-                                min="10"
-                                max="90"
+                                min="0"
+                                max="100"
                                 step="5"
-                                value={localSettings.lowProgressThreshold}
-                                onChange={(e) => setLocalSettings({
-                                    ...localSettings,
-                                    lowProgressThreshold: parseInt(e.target.value)
-                                })}
-                                className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-primary"
+                                value={localSettings.weightsHabits}
+                                onChange={(e) => setLocalSettings(s => ({ ...s, weightsHabits: Number(e.target.value) || 0 }))}
+                                className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                            />
+                        </div>
+
+                        <div className="p-3.5 sm:p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                            <div className="flex justify-between text-xs font-semibold mb-2">
+                                <span className="text-white flex items-center gap-1.5">
+                                    <ListTodo size={14} className="text-blue-400" /> Tasks Completion
+                                </span>
+                                <span className="font-mono text-blue-400 font-bold">{localSettings.weightsTasks}%</span>
+                            </div>
+                            <input
+                                type="range"
+                                min="0"
+                                max="100"
+                                step="5"
+                                value={localSettings.weightsTasks}
+                                onChange={(e) => setLocalSettings(s => ({ ...s, weightsTasks: Number(e.target.value) || 0 }))}
+                                className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                            />
+                        </div>
+
+                        <div className="p-3.5 sm:p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                            <div className="flex justify-between text-xs font-semibold mb-2">
+                                <span className="text-white flex items-center gap-1.5">
+                                    <BookOpen size={14} className="text-purple-400" /> Learning Focus
+                                </span>
+                                <span className="font-mono text-purple-400 font-bold">{localSettings.weightsLearning}%</span>
+                            </div>
+                            <input
+                                type="range"
+                                min="0"
+                                max="100"
+                                step="5"
+                                value={localSettings.weightsLearning}
+                                onChange={(e) => setLocalSettings(s => ({ ...s, weightsLearning: Number(e.target.value) || 0 }))}
+                                className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-purple-500"
                             />
                         </div>
                     </div>
 
-                    <Button onClick={() => handleSave('notifications')} className="mt-8 bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-white flex items-center justify-center gap-2">
-                        <Save size={18} />
-                        Save Alerts
-                    </Button>
+                    {/* Split Bar Preview */}
+                    <div className="space-y-1.5 pt-4 mt-4 border-t border-white/5">
+                        <span className="text-[10px] uppercase font-bold text-muted tracking-wider block">Formula Split Preview</span>
+                        <div className="h-2.5 sm:h-3 w-full flex rounded-full overflow-hidden border border-white/10 bg-black/40">
+                            <div className="bg-orange-500 transition-all duration-300" style={{ width: `${localSettings.weightsHabits}%` }} title={`Habits: ${localSettings.weightsHabits}%`} />
+                            <div className="bg-blue-500 transition-all duration-300" style={{ width: `${localSettings.weightsTasks}%` }} title={`Tasks: ${localSettings.weightsTasks}%`} />
+                            <div className="bg-purple-500 transition-all duration-300" style={{ width: `${localSettings.weightsLearning}%` }} title={`Learning: ${localSettings.weightsLearning}%`} />
+                        </div>
+                    </div>
                 </Card>
 
-                {/* 5. Data Management */}
-                <Card className="md:col-span-2 border-red-900/30 bg-red-900/5">
-                    <h3 className="text-xl font-bold text-red-500 mb-6 flex items-center gap-2">
-                        <Trash2 size={24} />
-                        Data Management
-                    </h3>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <Button
-                            onClick={exportData}
-                            className="bg-background border border-gray-800 hover:border-blue-500/50 hover:bg-blue-500/10 text-white flex items-center justify-center gap-2 py-4 rounded-xl transition-all"
-                        >
-                            <Download size={18} />
-                            Export Data
-                        </Button>
-
-                        <Button
-                            onClick={clearActivityLog}
-                            className="bg-background border border-gray-800 hover:border-yellow-500/50 hover:bg-yellow-500/10 text-white flex items-center justify-center gap-2 py-4 rounded-xl transition-all"
-                        >
-                            <Trash2 size={18} />
-                            Clear Activity Log
-                        </Button>
-
-                        <Button
-                            onClick={resetData}
-                            className="bg-red-600/10 border border-red-600/30 hover:bg-red-600 text-red-500 hover:text-white flex items-center justify-center gap-2 py-4 rounded-xl transition-all"
-                        >
-                            <RotateCcw size={18} />
-                            Reset to Default
-                        </Button>
+                {/* 2. Dashboard Modules Visibility */}
+                <Card className="flex flex-col p-4 sm:p-6 bg-[#17171C]/90 border-white/5">
+                    <div className="flex items-center gap-2.5 sm:gap-3 mb-4 sm:mb-5 pb-3 border-b border-white/5">
+                        <div className="p-2 sm:p-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 shrink-0">
+                            <Layers size={17} />
+                        </div>
+                        <div>
+                            <h3 className="text-sm sm:text-base font-extrabold text-white">Module Display Toggles</h3>
+                            <p className="text-[11px] sm:text-xs text-muted">Show or hide specific sections on your dashboard</p>
+                        </div>
                     </div>
 
-                    <p className="text-[11px] text-red-400/50 mt-4 text-center italic">
-                        Warning: Resetting will clear all your progress and restore the original template.
-                    </p>
+                    <div className="space-y-3 flex-1">
+                        <label className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-white/[0.02] border border-white/5 cursor-pointer hover:border-white/10 transition-colors">
+                            <span className="text-xs font-semibold text-white">Habit Tracker Section</span>
+                            <input
+                                type="checkbox"
+                                checked={localSettings.showHabits ?? true}
+                                onChange={(e) => setLocalSettings(s => ({ ...s, showHabits: e.target.checked }))}
+                                className="w-4 h-4 rounded bg-gray-800 border-gray-700 text-primary focus:ring-primary/20"
+                            />
+                        </label>
+
+                        <label className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-white/[0.02] border border-white/5 cursor-pointer hover:border-white/10 transition-colors">
+                            <span className="text-xs font-semibold text-white">Task Management Section</span>
+                            <input
+                                type="checkbox"
+                                checked={localSettings.showTasks ?? true}
+                                onChange={(e) => setLocalSettings(s => ({ ...s, showTasks: e.target.checked }))}
+                                className="w-4 h-4 rounded bg-gray-800 border-gray-700 text-primary focus:ring-primary/20"
+                            />
+                        </label>
+
+                        <label className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-white/[0.02] border border-white/5 cursor-pointer hover:border-white/10 transition-colors">
+                            <span className="text-xs font-semibold text-white">Learning Sessions Section</span>
+                            <input
+                                type="checkbox"
+                                checked={localSettings.showLearning ?? true}
+                                onChange={(e) => setLocalSettings(s => ({ ...s, showLearning: e.target.checked }))}
+                                className="w-4 h-4 rounded bg-gray-800 border-gray-700 text-primary focus:ring-primary/20"
+                            />
+                        </label>
+
+                        <label className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-white/[0.02] border border-white/5 cursor-pointer hover:border-white/10 transition-colors">
+                            <span className="text-xs font-semibold text-white">Goal Roadmaps Section</span>
+                            <input
+                                type="checkbox"
+                                checked={localSettings.showGoals ?? true}
+                                onChange={(e) => setLocalSettings(s => ({ ...s, showGoals: e.target.checked }))}
+                                className="w-4 h-4 rounded bg-gray-800 border-gray-700 text-primary focus:ring-primary/20"
+                            />
+                        </label>
+                    </div>
+                </Card>
+
+                {/* 3. Alerts & Notifications */}
+                <Card className="flex flex-col p-4 sm:p-6 bg-[#17171C]/90 border-white/5">
+                    <div className="flex items-center gap-2.5 sm:gap-3 mb-4 sm:mb-5 pb-3 border-b border-white/5">
+                        <div className="p-2 sm:p-2.5 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20 shrink-0">
+                            <Bell size={17} />
+                        </div>
+                        <div>
+                            <h3 className="text-sm sm:text-base font-extrabold text-white">Alerts & Warning Thresholds</h3>
+                            <p className="text-[11px] sm:text-xs text-muted">Configure proactive reminders and health banners</p>
+                        </div>
+                    </div>
+
+                    <div className="space-y-3 sm:space-y-4 flex-1">
+                        <label className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-white/[0.02] border border-white/5 cursor-pointer hover:border-white/10 transition-colors">
+                            <div>
+                                <div className="text-xs font-semibold text-white">Overdue Task Alerts</div>
+                                <div className="text-[10px] text-muted">Show warning indicators on tasks past due date</div>
+                            </div>
+                            <input
+                                type="checkbox"
+                                checked={localSettings.overdueAlerts ?? true}
+                                onChange={(e) => setLocalSettings(s => ({ ...s, overdueAlerts: e.target.checked }))}
+                                className="w-4 h-4 rounded bg-gray-800 border-gray-700 text-primary focus:ring-primary/20"
+                            />
+                        </label>
+
+                        <label className="flex items-center justify-between p-2.5 sm:p-3 rounded-xl bg-white/[0.02] border border-white/5 cursor-pointer hover:border-white/10 transition-colors">
+                            <div>
+                                <div className="text-xs font-semibold text-white">Low Daily Score Warning</div>
+                                <div className="text-[10px] text-muted">Display banner when score drops below threshold</div>
+                            </div>
+                            <input
+                                type="checkbox"
+                                checked={localSettings.lowProgressAlerts ?? true}
+                                onChange={(e) => setLocalSettings(s => ({ ...s, lowProgressAlerts: e.target.checked }))}
+                                className="w-4 h-4 rounded bg-gray-800 border-gray-700 text-primary focus:ring-primary/20"
+                            />
+                        </label>
+
+                        {localSettings.lowProgressAlerts && (
+                            <div className="pt-2">
+                                <div className="flex justify-between text-xs font-semibold mb-1">
+                                    <span className="text-muted">Score Threshold Warning</span>
+                                    <span className="font-mono text-amber-400 font-bold">&lt; {localSettings.lowProgressThreshold || 50}%</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="30"
+                                    max="70"
+                                    step="5"
+                                    value={localSettings.lowProgressThreshold || 50}
+                                    onChange={(e) => setLocalSettings(s => ({ ...s, lowProgressThreshold: Number(e.target.value) || 50 }))}
+                                    className="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                                />
+                            </div>
+                        )}
+                    </div>
+                </Card>
+
+                {/* Save Changes Button */}
+                <div className="md:col-span-2 flex justify-end">
+                    <button
+                        type="button"
+                        onClick={handleSaveSettings}
+                        disabled={saving}
+                        className="w-full sm:w-auto px-6 py-3 rounded-xl bg-primary hover:bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 transition-all active:scale-95 disabled:opacity-50"
+                    >
+                        <Save size={16} />
+                        <span>{saving ? 'Saving Preferences...' : 'Save Settings & Preferences'}</span>
+                    </button>
+                </div>
+
+                {/* 4. Reset Productivity Data Card */}
+                <Card className="md:col-span-2 p-4 sm:p-6 bg-gradient-to-r from-red-950/20 via-[#17171C] to-red-950/10 border-red-500/20">
+                    <div className="flex items-center gap-2.5 sm:gap-3 mb-4 sm:mb-5 pb-3 border-b border-red-500/20">
+                        <div className="p-2 sm:p-2.5 bg-red-500/10 text-red-400 rounded-xl border border-red-500/30 shrink-0">
+                            <Database size={18} />
+                        </div>
+                        <div>
+                            <h3 className="text-sm sm:text-base font-extrabold text-white flex items-center gap-2">
+                                Reset Productivity Data
+                            </h3>
+                            <p className="text-[11px] sm:text-xs text-muted">
+                                Permanently clear your habits, tasks, goals, and learning sessions.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="p-4 sm:p-6 rounded-2xl bg-white/[0.02] border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                        <div>
+                            <h4 className="text-xs sm:text-sm font-bold text-white mb-0.5">Reset Productivity Data</h4>
+                            <p className="text-[11px] sm:text-xs text-muted">
+                                Clear all records in Neon PostgreSQL and reset dashboard to zero
+                            </p>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={handleResetProductivityData}
+                            className="w-full sm:w-auto px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl bg-red-500/10 border border-red-500/30 hover:bg-red-500 hover:text-white text-red-400 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-red-500/10 shrink-0 group active:scale-95"
+                        >
+                            <RotateCcw size={15} className="group-hover:-rotate-45 transition-transform" />
+                            <span>Reset Productivity Data</span>
+                        </button>
+                    </div>
+
+                    <div className="mt-3 sm:mt-4 p-3 sm:p-3.5 rounded-xl bg-red-500/5 border border-red-500/15 flex items-start gap-2.5 text-[10px] sm:text-[11px] text-red-300/80">
+                        <AlertTriangle size={14} className="text-red-400 shrink-0 mt-0.5" />
+                        <div>
+                            <strong className="text-red-300">Note:</strong> Resetting permanently removes all your productivity records from Neon PostgreSQL and resets your dashboard to a clean zero state without inserting sample data.
+                        </div>
+                    </div>
                 </Card>
             </div>
 
-            {/* Notification Toasts */}
+            {/* Notification Toast */}
             <AnimatePresence>
-                {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+                {toast && (
+                    <Toast
+                        message={toast.message}
+                        type={toast.type}
+                        onClose={() => setToast(null)}
+                    />
+                )}
             </AnimatePresence>
         </MotionWrapper>
     );

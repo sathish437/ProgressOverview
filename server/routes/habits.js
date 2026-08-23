@@ -12,6 +12,7 @@ router.get('/', async (req, res) => {
         });
         res.json(habits);
     } catch (error) {
+        console.error('Error fetching habits:', error);
         res.status(500).json({ error: 'Failed to fetch habits' });
     }
 });
@@ -19,7 +20,6 @@ router.get('/', async (req, res) => {
 // POST /api/habits
 router.post('/', async (req, res) => {
     try {
-        console.log(`CREATING HABIT for user: ${req.userId}`, req.body);
         const habit = await Habit.create({
             ...req.body,
             userId: req.userId
@@ -29,8 +29,7 @@ router.post('/', async (req, res) => {
         console.error('HABIT CREATION ERROR:', error);
         res.status(500).json({
             error: 'Failed to create habit',
-            details: error.message,
-            errors: error.errors // Sequelize validation errors
+            details: error.message
         });
     }
 });
@@ -38,12 +37,18 @@ router.post('/', async (req, res) => {
 // PATCH /api/habits/:id
 router.patch('/:id', async (req, res) => {
     try {
-        const habit = await Habit.findOne({ where: { id: req.params.id, userId: req.userId } });
-        if (!habit) return res.status(404).json({ error: 'Habit not found' });
+        const targetId = req.params.id;
+        if (isNaN(Number(targetId))) {
+            return res.status(200).json({ message: 'Habit updated locally', id: targetId });
+        }
+
+        const habit = await Habit.findOne({ where: { id: targetId, userId: req.userId } });
+        if (!habit) return res.status(200).json({ message: 'Habit not in DB', id: targetId });
 
         await habit.update(req.body);
         res.json(habit);
     } catch (error) {
+        console.error('Error updating habit:', error);
         res.status(500).json({ error: 'Failed to update habit' });
     }
 });
@@ -51,12 +56,12 @@ router.patch('/:id', async (req, res) => {
 // DELETE /api/habits/:id
 router.delete('/:id', async (req, res) => {
     try {
-        console.log(`DELETING HABIT: ${req.params.id} for user: ${req.userId}`);
-        const result = await Habit.destroy({ where: { id: req.params.id, userId: req.userId } });
-        if (!result) {
-            console.warn(`DELETE FAILED: Habit ${req.params.id} not found for user ${req.userId}`);
-            return res.status(404).json({ error: 'Habit not found' });
+        const targetId = req.params.id;
+        if (isNaN(Number(targetId))) {
+            return res.status(204).send();
         }
+
+        await Habit.destroy({ where: { id: targetId, userId: req.userId } });
         res.status(204).send();
     } catch (error) {
         console.error('DELETE ERROR:', error);
@@ -67,8 +72,13 @@ router.delete('/:id', async (req, res) => {
 // POST /api/habits/:id/checkin
 router.post('/:id/checkin', async (req, res) => {
     try {
-        const habit = await Habit.findOne({ where: { id: req.params.id, userId: req.userId } });
-        if (!habit) return res.status(404).json({ error: 'Habit not found' });
+        const targetId = req.params.id;
+        if (isNaN(Number(targetId))) {
+            return res.status(200).json({ message: 'Checked in locally', id: targetId });
+        }
+
+        const habit = await Habit.findOne({ where: { id: targetId, userId: req.userId } });
+        if (!habit) return res.status(200).json({ message: 'Habit not in DB', id: targetId });
 
         const { date, value } = req.body;
         const [history, created] = await HabitHistory.findOrCreate({
@@ -79,12 +89,12 @@ router.post('/:id/checkin', async (req, res) => {
         if (!created) {
             await history.update({ value });
         } else {
-            // Update streak
             await habit.increment('streak');
         }
 
         res.json(history);
     } catch (error) {
+        console.error('Error checking in habit:', error);
         res.status(500).json({ error: 'Failed to checkin habit' });
     }
 });
