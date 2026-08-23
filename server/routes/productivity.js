@@ -73,7 +73,6 @@ const handleResetProductivityData = async (req, res) => {
     }
 };
 
-// Route aliases
 router.post('/reset', handleResetProductivityData);
 router.delete('/reset', handleResetProductivityData);
 router.post('/', handleResetProductivityData);

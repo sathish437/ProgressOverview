@@ -19,7 +19,7 @@ import { Toast } from '../components/ui/Toast';
 import { AnimatePresence } from 'framer-motion';
 
 export default function Settings() {
-    const { settings, updateSettings, resetToTemplate } = useData();
+    const { settings, updateSettings, resetProductivityData } = useData();
     const [localSettings, setLocalSettings] = useState(null);
     const [saving, setSaving] = useState(false);
     const [toast, setToast] = useState(null);
@@ -70,7 +70,7 @@ export default function Settings() {
     const handleResetProductivityData = async () => {
         if (window.confirm("Are you sure you want to reset all your productivity data? This will permanently remove your habits, tasks, goals, and learning logs.")) {
             try {
-                await resetToTemplate();
+                await resetProductivityData();
                 setToast({ message: "Productivity data reset successfully! All records cleared.", type: 'success' });
             } catch (err) {
                 setToast({ message: "Failed to reset productivity data.", type: 'error' });

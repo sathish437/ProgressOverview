@@ -22,7 +22,7 @@ import defaultAvatar from '../pages/img/photo1.jpg';
 
 export function Topbar({ onMenuClick }) {
     const { user, logout } = useAuth();
-    const { tasks, habits, resetToTemplate, exportPDF } = useData();
+    const { tasks, habits, resetProductivityData, exportPDF } = useData();
     const navigate = useNavigate();
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -46,7 +46,7 @@ export function Topbar({ onMenuClick }) {
 
     const handleReset = async () => {
         if (window.confirm("Are you sure you want to reset all your productivity data? This will permanently remove your habits, tasks, goals, and learning logs.")) {
-            await resetToTemplate();
+            await resetProductivityData();
             setIsProfileOpen(false);
         }
     };

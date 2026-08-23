@@ -1,13 +1,12 @@
 import { format } from 'date-fns';
 
-export const storageService = {
+export const pdfReportService = {
     exportDataPDF: (data, user) => {
         const reportDate = format(new Date(), 'MMMM d, yyyy');
         const habits = data.habits || [];
         const tasks = data.tasks || [];
         const goals = data.goals || [];
         const learning = data.learning || [];
-        const settings = data.settings || {};
 
         const totalTasks = tasks.length;
         const doneTasks = tasks.filter(t => t.status === 'DONE').length;

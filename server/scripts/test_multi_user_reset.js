@@ -11,7 +11,7 @@ dotenv.config({ path: path.join(__dirname, '../.env') });
 
 async function runMultiUserTest() {
     console.log('========================================================');
-    console.log('🧪 MULTI-USER ISOLATION & RESET TO TEMPLATE TEST');
+    console.log('🧪 MULTI-USER ISOLATION & RESET PRODUCTIVITY DATA TEST');
     console.log('========================================================\n');
 
     try {
@@ -137,8 +137,8 @@ async function runMultiUserTest() {
         console.log(`📊 User B baseline counts before User A reset:`);
         console.log(`   Tasks: ${userBTasksBefore}, Habits: ${userBHabitsBefore}, Goals: ${userBGoalsBefore}, Milestones: ${userBMilestonesBefore}, Learning: ${userBLearningBefore}\n`);
 
-        // 6. TRIGGER USER A RESET TO TEMPLATE
-        console.log('⚡ Triggering "Reset to Template" ONLY for User A...');
+        // 6. TRIGGER USER A RESET PRODUCTIVITY DATA
+        console.log('⚡ Triggering "Reset Productivity Data" ONLY for User A...');
         const mockReq = { userId: userA.id };
         let mockResData = null;
         const mockRes = {
@@ -147,7 +147,7 @@ async function runMultiUserTest() {
         };
 
         // Execute user-specific reset
-        const templateModule = await import('../routes/template.js');
+        const productivityModule = await import('../routes/productivity.js');
         // Let's call the endpoint logic directly or via fetch
         const transaction = await sequelize.transaction();
         try {
@@ -166,23 +166,11 @@ async function runMultiUserTest() {
             await Habit.destroy({ where: { userId }, transaction });
             await Task.destroy({ where: { userId }, transaction });
             await Learning.destroy({ where: { userId }, transaction });
-            await Setting.destroy({ where: { userId }, transaction });
 
-            // Insert fresh template for User A
-            await Setting.create({ userId, weightsHabits: 40, weightsTasks: 40, weightsLearning: 20 }, { transaction });
-            await Habit.create({ title: 'Morning Deep Focus (45m)', targetPerDay: 1, userId }, { transaction });
-            await Habit.create({ title: 'Read Tech Books', targetPerDay: 1, userId }, { transaction });
-            await Habit.create({ title: 'Hydration & Daily Workout', targetPerDay: 1, userId }, { transaction });
-            await Habit.create({ title: 'Code Refactoring', targetPerDay: 1, userId }, { transaction });
-            await Task.create({ title: 'Architect Kanban Drag-and-Drop Task Flow', status: 'DONE', userId }, { transaction });
-            await Task.create({ title: 'Design Daily Productivity Scoring Engine', status: 'IN_PROGRESS', userId }, { transaction });
-            await Task.create({ title: 'Integrate Pomodoro Focus Timer', status: 'IN_PROGRESS', userId }, { transaction });
-            await Task.create({ title: 'Review System Metrics', status: 'REVIEW', userId }, { transaction });
-            await Task.create({ title: 'Optimize Mobile Drawer Navigation', status: 'TODO', userId }, { transaction });
-            await Task.create({ title: 'Prepare Growth Milestones', status: 'TODO', userId }, { transaction });
-            const g1 = await Goal.create({ title: 'Master Full-Stack Architecture', targetValue: 100, userId }, { transaction });
-            await Milestone.create({ title: 'Course', value: 20, done: true, goalId: g1.id }, { transaction });
-            await Learning.create({ topic: 'TypeScript Advanced Generics', minutes: 45, date: '2026-08-23', userId }, { transaction });
+            let settings = await Setting.findOne({ where: { userId }, transaction });
+            if (!settings) {
+                await Setting.create({ userId, weightsHabits: 40, weightsTasks: 40, weightsLearning: 20 }, { transaction });
+            }
 
             await transaction.commit();
             console.log('✅ User A reset transaction committed.\n');
@@ -191,13 +179,17 @@ async function runMultiUserTest() {
             throw err;
         }
 
-        // 7. Verify User A data in Neon PostgreSQL
-        const userATasksAfter = await Task.findAll({ where: { userId: userA.id } });
-        const userAHabitsAfter = await Habit.findAll({ where: { userId: userA.id } });
-        console.log(`📋 User A Post-Reset Data in Neon PostgreSQL:`);
-        console.log(`   - Custom Task "User A Custom Feature Task #101" removed? ${!userATasksAfter.some(t => t.title.includes('Custom'))}`);
-        console.log(`   - Default Template Tasks loaded? Count = ${userATasksAfter.length} (Expected 6)`);
-        console.log(`   - Default Template Habits loaded? Count = ${userAHabitsAfter.length} (Expected 4)\n`);
+        // 7. Verify User A data in Neon PostgreSQL (Expected 0 records)
+        const userATasksAfter = await Task.count({ where: { userId: userA.id } });
+        const userAHabitsAfter = await Habit.count({ where: { userId: userA.id } });
+        const userAGoalsAfter = await Goal.count({ where: { userId: userA.id } });
+        const userALearningAfter = await Learning.count({ where: { userId: userA.id } });
+
+        console.log(`📋 User A Post-Reset Data in Neon PostgreSQL (Zero State):`);
+        console.log(`   - Tasks count = ${userATasksAfter} (Expected 0) ${userATasksAfter === 0 ? '✅' : '❌'}`);
+        console.log(`   - Habits count = ${userAHabitsAfter} (Expected 0) ${userAHabitsAfter === 0 ? '✅' : '❌'}`);
+        console.log(`   - Goals count = ${userAGoalsAfter} (Expected 0) ${userAGoalsAfter === 0 ? '✅' : '❌'}`);
+        console.log(`   - Learning count = ${userALearningAfter} (Expected 0) ${userALearningAfter === 0 ? '✅' : '❌'}\n`);
 
         // 8. CRITICAL CHECK: Verify User B data in Neon PostgreSQL
         const userBTasksAfter = await Task.findAll({ where: { userId: userB.id } });

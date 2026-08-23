@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
-import { storageService } from '../services/storage';
+import { pdfReportService } from '../services/pdfReport';
 import { getDemoProductivityData } from '../data/demoData';
 import { format } from 'date-fns';
 
@@ -228,7 +228,7 @@ export function DataProvider({ children }) {
     };
 
     // Reset Productivity Data
-    const resetData = async () => {
+    const resetProductivityData = async () => {
         setLoading(true);
 
         if (isDemo) {
@@ -268,7 +268,7 @@ export function DataProvider({ children }) {
     };
 
     const exportPDF = () => {
-        storageService.exportDataPDF(data, user);
+        pdfReportService.exportDataPDF(data, user);
     };
 
     return (
@@ -285,8 +285,9 @@ export function DataProvider({ children }) {
             deleteItem,
             checkHabit,
             updateSettings,
-            resetData,
-            resetToTemplate: resetData,
+            resetProductivityData,
+            resetData: resetProductivityData,
+            resetToTemplate: resetProductivityData,
             exportPDF,
             loading,
             error,

@@ -12,7 +12,7 @@ import habitRoutes from './routes/habits.js';
 import learningRoutes from './routes/learning.js';
 import settingRoutes from './routes/settings.js';
 import dashboardRoutes from './routes/dashboard.js';
-import templateRoutes from './routes/template.js';
+import productivityRoutes from './routes/productivity.js';
 import { auth } from './middleware/auth.js';
 
 import path from 'path';
@@ -23,14 +23,12 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// 🔥 Fix __dirname (ES modules)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// 🔥 Middleware
+// Middleware
 app.use(cors());
 app.use(express.json());
-
 
 // =======================
 // ✅ PUBLIC ROUTES
@@ -38,7 +36,6 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 
 app.get('/api/test-server', (req, res) => {
-    console.log('--- DBG: /api/test-server hit ---');
     res.json({ message: "Server is reachable and picking up changes" });
 });
 
@@ -64,22 +61,18 @@ app.use('/api/habits', auth, habitRoutes);
 app.use('/api/learning', auth, learningRoutes);
 app.use('/api/settings', auth, settingRoutes);
 app.use('/api/dashboard', auth, dashboardRoutes);
-app.use('/api/template', auth, templateRoutes);
-app.use('/api/reset', auth, templateRoutes);
-app.use('/api/reset-template', auth, templateRoutes);
-app.use('/api/productivity', auth, templateRoutes);
-
+app.use('/api/productivity', auth, productivityRoutes);
+app.use('/api/reset', auth, productivityRoutes);
 
 // =======================
-// 🔥 SERVE FRONTEND (IMPORTANT)
+// 🚀 SERVE FRONTEND BUILD
 // =======================
 app.use(express.static(path.join(__dirname, '../client/dist')));
 
-// React Router support
+// React Router fallback
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
-
 
 // =======================
 // 🚀 START SERVER

@@ -24,7 +24,7 @@ dist-ssr/
 .next/
 .nuxt/
 .output/
-
+server/.env
 # Logs
 *.log
 logs/
