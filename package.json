@@ -4,6 +4,8 @@
     "version": "1.0.0",
     "type": "module",
     "scripts": {
+        "start": "node server/index.js",
+        "build": "npm run client:build",
         "client:dev": "vite client",
         "client:build": "vite build client",
         "client:lint": "eslint client",

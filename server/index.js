@@ -1,6 +1,18 @@
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Initialize environment variables before importing dependent modules
+dotenv.config();
+dotenv.config({ path: path.join(__dirname, '.env') });
+dotenv.config({ path: path.join(process.cwd(), '.env') });
+dotenv.config({ path: path.join(process.cwd(), 'server/.env') });
+
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import sequelize from './config/database.js';
 import './models/index.js';
 
@@ -15,16 +27,8 @@ import dashboardRoutes from './routes/dashboard.js';
 import productivityRoutes from './routes/productivity.js';
 import { auth } from './middleware/auth.js';
 
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-dotenv.config();
-
 const app = express();
-const PORT = process.env.PORT || 5000;
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
@@ -86,6 +90,6 @@ app.listen(PORT, async () => {
         await sequelize.sync({ alter: true });
         console.log('Database schema synchronized successfully.');
     } catch (error) {
-        console.error('Unable to connect to the database:', error);
+        console.error('Unable to connect to the database:', error.message);
     }
 });
