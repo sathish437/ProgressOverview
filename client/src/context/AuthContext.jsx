@@ -17,8 +17,8 @@ export function AuthProvider({ children }) {
             const savedToken = sessionStorage.getItem('authToken');
             const isDemo = sessionStorage.getItem('isDemoMode') === 'true' || savedToken === 'demo-session-token';
 
-            if (isDemo) {
-                // Initialize Demo User (Alex Rivers) without hitting real database
+            if (savedToken && isDemo) {
+                // If user explicitly activated Demo Mode in this browser session, restore demo state
                 setUser(getDemoUser());
                 setToken('demo-session-token');
                 setLoading(false);
@@ -26,6 +26,7 @@ export function AuthProvider({ children }) {
             }
 
             if (savedToken) {
+                // If user is genuinely authenticated with JWT, verify and load profile from backend
                 try {
                     const res = await axios.get(`${API_BASE_URL}/users/me`, {
                         headers: { Authorization: `Bearer ${savedToken}` },
@@ -41,11 +42,9 @@ export function AuthProvider({ children }) {
                     setUser(null);
                 }
             } else {
-                // Default to Demo Mode with Alex Rivers for instant interactive preview
-                setUser(getDemoUser());
-                setToken('demo-session-token');
-                sessionStorage.setItem('authToken', 'demo-session-token');
-                sessionStorage.setItem('isDemoMode', 'true');
+                // Fresh visit: unauthenticated user must see Login page (NO auto-login)
+                setUser(null);
+                setToken(null);
             }
             setLoading(false);
         };

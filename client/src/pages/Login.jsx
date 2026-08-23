@@ -34,7 +34,7 @@ export default function Login() {
                             <LogIn size={28} />
                         </div>
                         <h1 className="text-2xl font-extrabold text-white tracking-tight">Productivity Tracker</h1>
-                        <p className="text-xs text-muted">Sign in or explore with local storage demo mode.</p>
+                        <p className="text-xs text-muted">Sign in to your account or explore with Demo Mode.</p>
                     </div>
 
                     {error && (
